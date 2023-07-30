@@ -1,12 +1,15 @@
 import os
 import sys
 import copy
+import json
 import shutil
 import pathlib
 import tempfile
 import textwrap
 import functools
 import contextlib
+
+from typing import cast, Dict
 
 from .py39compat import FS_NONASCII
 
@@ -125,6 +128,28 @@ class DistInfoPkg(OnSysPath, SiteDir):
         info = files["distinfo_pkg-1.0.0.dist-info"]
         info["METADATA"] = info["METADATA"].upper()
         build_files(files, self.site_dir)
+
+
+class DistInfoPkgEditable(DistInfoPkg):
+    """
+    Package with a PEP 660 direct_url.json.
+    """
+
+    files: FilesSpec = copy.deepcopy(DistInfoPkg.files)
+    some_hash = '524127ce937f7cb65665130c695abd18ca386f60bb29687efb976faa1596fdcc'
+    cast(Dict, files['distinfo_pkg-1.0.0.dist-info']).update(
+        {
+            'direct_url.json': json.dumps(
+                {
+                    "archive_info": {
+                        "hash": f"sha256={some_hash}",
+                        "hashes": {"sha256": f"{some_hash}"},
+                    },
+                    "url": "file:///path/to/distinfo_pkg-1.0.0.editable-py3-none-any.whl",
+                }
+            )
+        },
+    )
 
 
 class DistInfoPkgWithDot(OnSysPath, SiteDir):
