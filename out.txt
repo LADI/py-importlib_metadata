@@ -1,0 +1,91 @@
+.pkg-pypy39: _optional_hooks> python /Users/jaraco/.local/pipx/venvs/tox/lib/python3.11/site-packages/pyproject_api/_backend.py True setuptools.build_meta
+.pkg-pypy39: get_requires_for_build_editable> python /Users/jaraco/.local/pipx/venvs/tox/lib/python3.11/site-packages/pyproject_api/_backend.py True setuptools.build_meta
+.pkg-pypy39: build_editable> python /Users/jaraco/.local/pipx/venvs/tox/lib/python3.11/site-packages/pyproject_api/_backend.py True setuptools.build_meta
+pypy3.9: install_package> python -I -m pip install --force-reinstall --no-deps .tox/.tmp/package/22/importlib_metadata-6.7.1.dev18+g6c79954b-0.editable-py3-none-any.whl
+pypy3.9: commands[0]> pytest -p no:cov -p no:perf -k egg
+============================= test session starts ==============================
+platform darwin -- Python 3.9.17[pypy-7.3.12-final], pytest-7.4.0, pluggy-1.2.0
+cachedir: .tox/pypy3.9/.pytest_cache
+rootdir: /Users/jaraco/code/python/importlib_metadata
+configfile: pytest.ini
+plugins: pyfakefs-5.2.2, enabler-2.2.0, ruff-0.1, checkdocs-2.9.0
+collected 135 items / 114 deselected / 21 selected
+
+tests/test_api.py .F.....                                                [ 36%]
+tests/test_main.py ...F                                                  [ 57%]
+tests/test_zip.py ........                                               [100%]
+
+=================================== FAILURES ===================================
+_________________________ APITests.test_files_egg_info _________________________
+
+self = <tests.test_api.APITests testMethod=test_files_egg_info>
+
+    def test_files_egg_info(self):
+        self._test_files(files('egginfo-pkg'))
+>       self._test_files(files('egg_with_module-pkg'))
+
+tests/test_api.py:203: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+files = [PackagePath('egg_with_module.py'), PackagePath('setup.py'), PackagePath('egg_with_module_pkg.egg-info/PKG-INFO'), PackagePath('egg_with_module_pkg.egg-info/SOURCES.txt'), PackagePath('egg_with_module_pkg.egg-info/top_level.txt')]
+
+    @staticmethod
+    def _test_files(files):
+        root = files[0].root
+        for file in files:
+            assert file.root == root
+            assert not file.hash or file.hash.value
+            assert not file.hash or file.hash.mode == 'sha256'
+            assert not file.size or file.size >= 0
+>           assert file.locate().exists()
+E           AssertionError: assert False
+E            +  where False = <bound method Path.exists of PosixPath('/var/folders/sx/n5gkrgfx6zd91ymxr2sr9wvw00n8zm/T/tmphbkg6a9q/setup.py')>()
+E            +    where <bound method Path.exists of PosixPath('/var/folders/sx/n5gkrgfx6zd91ymxr2sr9wvw00n8zm/T/tmphbkg6a9q/setup.py')> = PosixPath('/var/folders/sx/n5gkrgfx6zd91ymxr2sr9wvw00n8zm/T/tmphbkg6a9q/setup.py').exists
+E            +      where PosixPath('/var/folders/sx/n5gkrgfx6zd91ymxr2sr9wvw00n8zm/T/tmphbkg6a9q/setup.py') = <bound method PackagePath.locate of PackagePath('setup.py')>()
+E            +        where <bound method PackagePath.locate of PackagePath('setup.py')> = PackagePath('setup.py').locate
+
+tests/test_api.py:189: AssertionError
+_______ PackagesDistributionsEggTest.test_packages_distributions_on_eggs _______
+
+self = <tests.test_main.PackagesDistributionsEggTest testMethod=test_packages_distributions_on_eggs>
+
+    def test_packages_distributions_on_eggs(self):
+        """
+        Test old-style egg packages with a variation of 'top_level.txt',
+        'SOURCES.txt', and 'installed-files.txt', available.
+        """
+        distributions = packages_distributions()
+    
+        def import_names_from_package(package_name):
+            return {
+                import_name
+                for import_name, package_names in distributions.items()
+                if package_name in package_names
+            }
+    
+        # egginfo-pkg declares one import ('mod') via top_level.txt
+        assert import_names_from_package('egginfo-pkg') == {'mod'}
+    
+        # egg_with_module-pkg has one import ('egg_with_module') inferred from
+        # installed-files.txt (top_level.txt is missing)
+>       assert import_names_from_package('egg_with_module-pkg') == {'egg_with_module'}
+E       AssertionError: assert {'egg_with_module', 'setup'} == {'egg_with_module'}
+E         Extra items in the left set:
+E         'setup'
+E         Use -v to get more diff
+
+tests/test_main.py:451: AssertionError
+=============================== warnings summary ===============================
+../../../../../opt/homebrew/Cellar/pypy3.9/7.3.12/libexec/lib/pypy3.9/_testmultiphase_build.py:8
+  /opt/homebrew/Cellar/pypy3.9/7.3.12/libexec/lib/pypy3.9/_testmultiphase_build.py:8: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses
+    import imp
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_api.py::APITests::test_files_egg_info - AssertionError: ass...
+FAILED tests/test_main.py::PackagesDistributionsEggTest::test_packages_distributions_on_eggs
+=========== 2 failed, 17 passed, 114 deselected, 1 warning in 1.64s ============
+pypy3.9: exit 1 (2.10 seconds) /Users/jaraco/code/python/importlib_metadata> pytest -p no:cov -p no:perf -k egg pid=62864
+.pkg-pypy39: _exit> python /Users/jaraco/.local/pipx/venvs/tox/lib/python3.11/site-packages/pyproject_api/_backend.py True setuptools.build_meta
+  pypy3.9: FAIL code 1 (3.91=setup[1.81]+cmd[2.10] seconds)
+  evaluation failed :( (3.98 seconds)
